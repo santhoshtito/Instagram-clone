@@ -5,6 +5,8 @@ import { db, auth }  from './firebase';
 import { makeStyles } from '@material-ui/core/styles';
 import  Modal  from '@material-ui/core/Modal';
 import { Button, Input } from '@material-ui/core';
+import ImageUpload from './ImageUpload';
+import InstagramEmbed from 'react-instagram-embed';
 
 
 
@@ -35,7 +37,7 @@ function App() {
   const[ modalStyle] = useState(getModalStyle);
   const [posts, setPosts] = useState([]);  
   const [open, setOpen] = useState(false);
-  const [openSignIn, setOpenSignIn] = useState('false');
+  const [openSignIn, setOpenSignIn] = useState(false);
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const [email, setEmail] = useState();
@@ -63,9 +65,8 @@ function App() {
     unsubscribe();
   }
 }, [user, username]);
-
   useEffect(() => {
-    db.collection('posts').onSnapshot(snapshot => {
+    db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
     setPosts(snapshot.docs.map(doc => ({
       id: doc.id,
       post: doc.data()
@@ -98,11 +99,13 @@ function App() {
 
     setOpenSignIn(false);
       }
+
   return (
     <div className="app">
+      
       <Modal
-      open={open}
-      onClose={() => setOpen(false)}
+      open={openSignIn}
+      onClose={() => setOpenSignIn(false)}
       >
         <div style={modalStyle} className={classes.paper}>
 
@@ -129,7 +132,7 @@ function App() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit" onClick={signUp}>Sign Up</Button>
+          <Button type="submit" onClick={signIn}>Sign In</Button>
           </form>
 
 
@@ -139,8 +142,8 @@ function App() {
 
 
       <Modal
-      open={openSignIn}
-      onClose={() => setOpenSignIn(false)}
+      open={open}
+      onClose={() => setOpen(false)}
       >
         <div style={modalStyle} className={classes.paper}>
 
@@ -172,7 +175,7 @@ function App() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit" onClick={signIn}>Sign In</Button>
+          <Button type="submit" onClick={signUp}>Sign Up</Button>
 
 
         </form>
@@ -184,24 +187,53 @@ function App() {
            className="app__headerImage"
            src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
         />
+        {user ? (
+          <Button onClick={() => auth.signOut()}>Logout</Button>
+          ): (
+            <div className="app__loginContainer">
+            <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
+            <Button onClick={() => setOpen(true)}>Sign Up</Button>
+            </div>
+
+          )}
       </div>
-
-      {user ? (
-        <Button onClick={() => auth.signOut()}>Logout</Button>
-        ): (
-          <div className="app__loginContainer">
-          <Button onClick={() => setOpen(true)}>Sign In</Button>
-          <Button onClick={() => setOpen(true)}>Sign Up</Button>
-          </div>
-
-        )}
-
-      <h1>Santhosh</h1>
-      {
-        posts.map(({id, post}) => (
-          <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
+      <div className="app__posts">
+        <div className="app__postsLeft">
+        {
+        posts.map(({id , post}) => (
+          // console.log()
+          <Post key={id} postId={id} user={user} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
         ))
       }
+
+        </div>
+        <div className="app__postsRight">
+        <InstagramEmbed
+          url='https://www.instagram.com/p/CTW9O3loqk2/?utm_medium=copy_link'
+          clientAccessToken='123'
+          maxWidth={320}
+          hideCaption={false}
+          containerTagName='div'
+          protocol=''
+          injectScript
+          onLoading={() => {}}
+          onSuccess={() => {}}
+          onAfterRender={() => {}}
+          onFailure={() => {}}
+        />
+
+        </div>
+      </div>
+     
+
+
+      <h1>Santhosh</h1>
+     
+      {user ? (
+        <ImageUpload username={user.displayName} />
+      ):(
+        <h3>Sorry need to login to upload</h3>
+      )}
 
     </div>
   );

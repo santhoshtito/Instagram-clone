@@ -2,15 +2,24 @@
   margin: 0;
 }
 .app {
-  background-color: #fafafa;
-  height: 100vh;
+  background-color: #eeeeee;
+  height: 100%;
+}
+.app__posts{
+  padding: 20px;
+  display: flex;
 }
 
-.app__headerImage {
+.app__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background-color: white;
   padding: 20px;
-  border-bottom: 1px solid lightgray;
+  border-bottom: 1px solid rgb(182, 182, 182);
   object-fit: contain;
+  display: flex;
+  justify-content: space-between;
 }
 
 .app__signup{
